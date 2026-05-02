@@ -20,6 +20,24 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## API Endpoints
+
+All API routes expect an `x-user-id` header. The backend opens a DB transaction, sets `request.jwt.claim.sub`, and relies on your existing RLS policies.
+
+- `GET /api/diaries` — list a user's sleep diaries
+- `POST /api/diaries` — create a 14-day AASM-style diary from `{ "startDate": "YYYY-MM-DD" }`
+- `GET /api/diaries/[diaryId]` — fetch a diary with weeks, days, timeline items, and stored metrics
+- `PATCH /api/diaries/[diaryId]/days/[dayId]` — update `dayKind` and/or `notes`
+- `GET /api/diaries/[diaryId]/timeline-items` — list sleep/substance/bedtime timeline entries
+- `POST /api/diaries/[diaryId]/timeline-items` — create a point event or interval event with Zod validation
+- `PATCH /api/diaries/[diaryId]/timeline-items/[itemId]` — update a timeline item
+- `DELETE /api/diaries/[diaryId]/timeline-items/[itemId]` — delete a timeline item
+- `GET /api/diaries/[diaryId]/metrics` — recalculate and return weekly averages
+- `POST /api/diaries/[diaryId]/metrics` — same as GET, useful for explicit refresh flows
+
+Supported timeline item types:
+`sleep`, `nap`, `awake`, `in_bed`, `exercise`, `caffeine`, `alcohol`, `medicine`, `bedtime_marker`, `wake_marker`, `note`
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
