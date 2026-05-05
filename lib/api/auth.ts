@@ -1,35 +1,26 @@
-import { sql } from "drizzle-orm";
-import { type NextRequest } from "next/server";
-import { z } from "zod";
-import { db as rootDb } from "@/utils/db-client";
-import type { AppDb } from "@/lib/api/db";
 import { ApiError } from "@/lib/api/http";
+import { createClient } from '@/lib/supabase/server'
 
-const userIdSchema = z.string().trim().min(1).max(128);
 
-export function getRequestUserId(request: NextRequest) {
-  const userId = request.headers.get("x-user-id");
+export async function getRequestUserId() {
+  const supabaseClient = await createClient();
 
-  if (!userId) {
-    throw new ApiError("Missing x-user-id header", 401);
-  }
+  const { data: { user }, error } = await supabaseClient.auth.getUser()
 
-  return userIdSchema.parse(userId);
+  if (error) throw new ApiError(`error fetching current user ${error.message}`)
+
+  return user!.id
 }
 
-export async function withAuthenticatedDb<T>(
-  request: NextRequest,
-  callback: (db: AppDb, userId: string) => Promise<T>
-) {
-  const userId = getRequestUserId(request);
+export async function isUserAuthenticated(): Promise<boolean> {
+  const supabaseClient = await createClient();
 
-  return rootDb.transaction(async (transactionDb) => {
-    await transactionDb.execute(sql`
-      select
-        set_config('request.jwt.claim.sub', ${userId}, true),
-        set_config('request.jwt.claim.role', 'authenticated', true)
-    `);
+  const {
+    data: { user },
+    error,
+  } = await supabaseClient.auth.getUser();
 
-    return callback(transactionDb as unknown as AppDb, userId);
-  });
+  if (error || !user) return false
+
+  return true
 }
