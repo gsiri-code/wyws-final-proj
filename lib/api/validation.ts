@@ -7,15 +7,11 @@ const isoTimestampSchema = z.string().datetime({ offset: true });
 
 const timelineItemTypeValues = [
   "sleep",
-  "nap",
-  "awake",
   "in_bed",
   "exercise",
   "caffeine",
   "alcohol",
   "medicine",
-  "bedtime_marker",
-  "wake_marker",
   "note",
 ] as const;
 

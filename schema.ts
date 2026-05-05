@@ -30,15 +30,11 @@ export const diaryWeekNumberEnum = pgEnum("diary_week_number", [
 
 export const timelineItemTypeEnum = pgEnum("timeline_item_type", [
   "sleep",
-  "nap",
-  "awake",
   "in_bed",
   "exercise",
   "caffeine",
   "alcohol",
   "medicine",
-  "bedtime_marker",
-  "wake_marker",
   "note",
 ]);
 

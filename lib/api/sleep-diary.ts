@@ -4,8 +4,7 @@ import type { AppDb } from "@/lib/api/db";
 import { ApiError } from "@/lib/api/http";
 
 const WEEK_NUMBERS = ["week_1", "week_2"] as const;
-const BEDTIME_TYPES = new Set(["bedtime_marker", "in_bed"]);
-const WAKE_TYPES = new Set(["wake_marker"]);
+const BEDTIME_TYPES = new Set(["in_bed"]);
 const SLEEP_TYPES = new Set(["sleep"]);
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -24,15 +23,11 @@ type CreateTimelineItemInput = {
   diaryDayId: string;
   type:
     | "sleep"
-    | "nap"
-    | "awake"
     | "in_bed"
     | "exercise"
     | "caffeine"
     | "alcohol"
     | "medicine"
-    | "bedtime_marker"
-    | "wake_marker"
     | "note";
   timestamp?: string;
   startTime?: string;
@@ -408,19 +403,31 @@ function computeDayMetrics(day: DiaryDayRow, items: TimelineItemRow[]) {
 
   const bedtimeEvent = firstByType(events, BEDTIME_TYPES, true);
   const sleepEvent = firstByType(events, SLEEP_TYPES, true);
-  const wakeEvent = firstByType(events, WAKE_TYPES, false);
-  const sleepIntervals = items.filter((item) => item.type === "sleep" && item.startTime && item.endTime);
-  const awakeIntervals = items.filter((item) => item.type === "awake" && item.startTime && item.endTime);
+  const sleepIntervals = items.filter(
+    (item) =>
+      item.type === "sleep" &&
+      item.startTime &&
+      item.endTime &&
+      (item.metadata as Record<string, unknown> | null | undefined)?.["segment"] !== "nap" &&
+      (item.metadata as Record<string, unknown> | null | undefined)?.["role"] !== "waso"
+  );
+  const wasoIntervals = items.filter(
+    (item) =>
+      item.type === "sleep" &&
+      item.startTime &&
+      item.endTime &&
+      (item.metadata as Record<string, unknown> | null | undefined)?.["role"] === "waso"
+  );
 
   const bedtime = bedtimeEvent?.eventStart ?? sleepEvent?.eventStart ?? null;
-  const wake = wakeEvent?.eventStart ?? latestSleepBoundary(items) ?? null;
+  const wake = latestSleepEnd(items) ?? null;
   const sleepStart = sleepEvent?.eventStart ?? null;
 
   const bedtimeMinutes = bedtime ? toMinutesAfterMidnight(bedtime) : null;
   const wakeMinutes = wake ? toMinutesAfterMidnight(wake) : null;
   const totalSleepMinutes = sumIntervals(sleepIntervals);
   const sleepLatencyMinutes = bedtime && sleepStart ? diffMinutes(bedtime, sleepStart) : null;
-  const wasoMinutes = sumIntervals(awakeIntervals);
+  const wasoMinutes = sumIntervals(wasoIntervals);
   const timeInBedMinutes = bedtime && wake ? diffMinutes(bedtime, wake) : null;
 
   const sleepEfficiencyPercent =
@@ -464,6 +471,25 @@ function latestSleepBoundary(items: TimelineItemRow[]) {
 
   boundaries.sort((a, b) => b.getTime() - a.getTime());
   return boundaries[0];
+}
+
+function latestSleepEnd(items: TimelineItemRow[]) {
+  const ends = items
+    .filter(
+      (item) =>
+        item.type === "sleep" &&
+        item.endTime instanceof Date &&
+        (item.metadata as Record<string, unknown> | null | undefined)?.["segment"] !== "nap" &&
+        (item.metadata as Record<string, unknown> | null | undefined)?.["role"] !== "waso"
+    )
+    .map((item) => item.endTime as Date);
+
+  if (ends.length === 0) {
+    return null;
+  }
+
+  ends.sort((a, b) => b.getTime() - a.getTime());
+  return ends[0];
 }
 
 function sumIntervals(items: TimelineItemRow[]) {
