@@ -4,7 +4,6 @@ type Variant = "primary" | "secondary" | "ghost";
 type Size = "sm" | "md" | "lg";
 
 export function Button({
-  asChild,
   variant = "primary",
   size = "md",
   width,
@@ -12,13 +11,11 @@ export function Button({
   className,
   ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  asChild?: boolean;
   variant?: Variant;
   size?: Size;
   width?: "full";
   isLoading?: boolean;
 }) {
-  const Comp: any = asChild ? "span" : "button";
   const base =
     "inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors disabled:opacity-50 disabled:pointer-events-none";
   const variants: Record<Variant, string> = {
@@ -32,7 +29,7 @@ export function Button({
     lg: "h-11 px-5 text-sm",
   };
   return (
-    <Comp
+    <button
       className={[
         base,
         variants[variant],

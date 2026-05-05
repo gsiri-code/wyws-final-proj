@@ -457,19 +457,6 @@ function firstByType<T extends { type: string; eventStart: Date | null }>(
   return matches[0] ?? null;
 }
 
-function latestSleepBoundary(items: TimelineItemRow[]) {
-  const boundaries = items
-    .flatMap((item) => [item.endTime, item.timestamp])
-    .filter((value): value is Date => value instanceof Date);
-
-  if (boundaries.length === 0) {
-    return null;
-  }
-
-  boundaries.sort((a, b) => b.getTime() - a.getTime());
-  return boundaries[0];
-}
-
 function latestSleepEnd(items: TimelineItemRow[]) {
   const ends = items
     .filter(
