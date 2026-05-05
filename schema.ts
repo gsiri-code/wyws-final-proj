@@ -7,6 +7,7 @@ import {
   numeric,
   pgEnum,
   pgPolicy,
+  pgSchema,
   pgTable,
   text,
   time,
@@ -41,51 +42,21 @@ export const timelineItemTypeEnum = pgEnum("timeline_item_type", [
   "note",
 ]);
 
-const currentUserId = sql`(select auth.uid()::text)`;
+const authSchema = pgSchema("auth");
 
-export const users = pgTable(
-  "users",
-  {
-    id: text("id").primaryKey(),
-    email: text("email").notNull().unique(),
-    passwordHash: text("password_hash").notNull(),
-    name: text("name"),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-  },
-  (table) => ({
-    emailIdx: index("users_email_idx").on(table.email),
-    selectOwnUser: pgPolicy("users_select_own", {
-      for: "select",
-      to: authenticatedRole,
-      using: sql`${table.id} = ${currentUserId}`,
-    }),
-    insertOwnUser: pgPolicy("users_insert_own", {
-      for: "insert",
-      to: authenticatedRole,
-      withCheck: sql`${table.id} = ${currentUserId}`,
-    }),
-    updateOwnUser: pgPolicy("users_update_own", {
-      for: "update",
-      to: authenticatedRole,
-      using: sql`${table.id} = ${currentUserId}`,
-      withCheck: sql`${table.id} = ${currentUserId}`,
-    }),
-    deleteOwnUser: pgPolicy("users_delete_own", {
-      for: "delete",
-      to: authenticatedRole,
-      using: sql`${table.id} = ${currentUserId}`,
-    }),
-  })
-).enableRLS();
+export const authUsers = authSchema.table("users", {
+  id: uuid("id").primaryKey(),
+});
+
+const currentUserId = sql`(select auth.uid())`;
 
 export const diaries = pgTable(
   "diaries",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    userId: text("user_id")
+    userId: uuid("user_id")
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+      .references(() => authUsers.id, { onDelete: "cascade" }),
     startDate: date("start_date", { mode: "string" }).notNull(),
     endDate: date("end_date", { mode: "string" }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
@@ -195,9 +166,9 @@ export const diaryDays = pgTable(
     diaryWeekId: uuid("diary_week_id")
       .notNull()
       .references(() => diaryWeeks.id, { onDelete: "cascade" }),
-    userId: text("user_id")
+    userId: uuid("user_id")
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+      .references(() => authUsers.id, { onDelete: "cascade" }),
     date: date("date", { mode: "string" }).notNull(),
     dayOfWeek: text("day_of_week").notNull(),
     dayKind: dayKindEnum("day_kind").default("day_off").notNull(),
@@ -247,9 +218,9 @@ export const timelineItems = pgTable(
     diaryDayId: uuid("diary_day_id")
       .notNull()
       .references(() => diaryDays.id, { onDelete: "cascade" }),
-    userId: text("user_id")
+    userId: uuid("user_id")
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+      .references(() => authUsers.id, { onDelete: "cascade" }),
     type: timelineItemTypeEnum("type").notNull(),
     timestamp: timestamp("timestamp", { withTimezone: true }),
     startTime: timestamp("start_time", { withTimezone: true }),
@@ -312,9 +283,9 @@ export const diaryWeekMetrics = pgTable(
     diaryWeekId: uuid("diary_week_id")
       .notNull()
       .references(() => diaryWeeks.id, { onDelete: "cascade" }),
-    userId: text("user_id")
+    userId: uuid("user_id")
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+      .references(() => authUsers.id, { onDelete: "cascade" }),
     averageBedtime: time("average_bedtime"),
     averageWakeTime: time("average_wake_time"),
     averageTotalSleepTimeMinutes: numeric("average_total_sleep_time_minutes", {
