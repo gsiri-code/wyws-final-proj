@@ -4,7 +4,7 @@ import { AuthForm } from "@/components/auth/auth-form";
 
 export const metadata: Metadata = {
   title: "Sign in",
-  description: "Sign in to your Sleepbook two-week sleep diary.",
+  description: "Sign in to your Sleepbook 7-day sleep diary.",
 };
 
 export default function LoginPage() {

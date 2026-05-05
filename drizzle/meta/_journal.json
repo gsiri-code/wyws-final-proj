@@ -29,6 +29,13 @@
       "when": 1778011381015,
       "tag": "0003_perfect_squirrel_girl",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1778013490367,
+      "tag": "0004_fantastic_aaron_stack",
+      "breakpoints": true
     }
   ]
 }

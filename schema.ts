@@ -23,11 +23,6 @@ export const dayKindEnum = pgEnum("day_kind", [
   "day_off",
 ]);
 
-export const diaryWeekNumberEnum = pgEnum("diary_week_number", [
-  "week_1",
-  "week_2",
-]);
-
 export const timelineItemTypeEnum = pgEnum("timeline_item_type", [
   "sleep",
   "in_bed",
@@ -95,7 +90,6 @@ export const diaryWeeks = pgTable(
     diaryId: uuid("diary_id")
       .notNull()
       .references(() => diaries.id, { onDelete: "cascade" }),
-    weekNumber: diaryWeekNumberEnum("week_number").notNull(),
     startDate: date("start_date", { mode: "string" }).notNull(),
     endDate: date("end_date", { mode: "string" }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
@@ -103,7 +97,7 @@ export const diaryWeeks = pgTable(
   },
   (table) => ({
     diaryIdIdx: index("diary_weeks_diary_id_idx").on(table.diaryId),
-    diaryWeekUnique: unique().on(table.diaryId, table.weekNumber),
+    diaryWeekUnique: unique().on(table.diaryId),
     sevenDayRangeCheck: check(
       "diary_weeks_seven_day_range_check",
       sql`${table.endDate} = ${table.startDate} + 6`

@@ -31,14 +31,20 @@ export async function fetchJson<T>(
   const json = text ? safeJsonParse(text) : null;
 
   if (!res.ok) {
+    const payload = json && typeof json === "object" ? (json as Record<string, unknown>) : null;
     const message =
-      (json && typeof json === "object" && "message" in json && typeof (json as any).message === "string"
-        ? (json as any).message
-        : `Request failed (${res.status})`);
+      typeof payload?.message === "string"
+        ? payload.message
+        : typeof payload?.error === "string"
+          ? payload.error
+          : `Request failed (${res.status})`;
+    const details = payload?.details;
     const fieldErrors =
-      json && typeof json === "object" && "fieldErrors" in json
-        ? ((json as any).fieldErrors as Record<string, string[]>)
-        : undefined;
+      payload && typeof payload.fieldErrors === "object"
+        ? (payload.fieldErrors as Record<string, string[]>)
+        : details && typeof details === "object" && "fieldErrors" in details
+          ? ((details as Record<string, unknown>).fieldErrors as Record<string, string[]>)
+          : undefined;
     throw new ApiClientError(message, { status: res.status, fieldErrors });
   }
 

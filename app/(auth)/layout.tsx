@@ -40,10 +40,10 @@ export default function AuthLayout({
 
         <div className="relative z-10 space-y-8 max-w-md">
           <span className="inline-flex items-center gap-2 rounded-pill bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-white/80 backdrop-blur-sm">
-            Two-week sleep diary
+            7-day sleep diary
           </span>
           <h2 className="font-display text-4xl xl:text-5xl leading-[1.05] tracking-tight">
-            Track your sleep clearly. Submit better reports.
+            Track your week clearly. Submit better reports.
           </h2>
           <p className="text-sm text-white/70 leading-relaxed">
             AASM-style logging with automatic weekly metrics and clean,

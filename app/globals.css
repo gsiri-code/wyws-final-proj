@@ -1,26 +1,72 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f4f6fb;
+  --foreground: #101828;
+  --foreground-muted: #52607a;
+  --foreground-subtle: #7b879d;
+  --border: #d8dfeb;
+  --surface: #ffffff;
+  --surface-muted: #edf2fb;
+  --link: #4f46e5;
+  --navy: #111827;
+  --purple: #6d5efc;
+  --mint: #24c8a5;
+  --yellow-strong: #f7c948;
+  --display-font: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-foreground-subtle: var(--foreground-subtle);
+  --color-border: var(--border);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-link: var(--link);
+  --color-navy: var(--navy);
+  --color-purple: var(--purple);
+  --color-mint: var(--mint);
+  --color-yellow-strong: var(--yellow-strong);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--display-font);
+  --radius-card: 1.5rem;
+  --radius-pill: 999px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--background);
 }
 
 body {
-  background: var(--background);
+  margin: 0;
+  background:
+    radial-gradient(circle at top, rgba(109, 94, 252, 0.1), transparent 28%),
+    linear-gradient(180deg, #f8faff 0%, #f4f6fb 100%);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.bg-dotted {
+  background-image: radial-gradient(rgba(17, 24, 39, 0.16) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+.glow-purple {
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(109, 94, 252, 0.45) 0%, rgba(109, 94, 252, 0) 68%);
+  filter: blur(16px);
 }

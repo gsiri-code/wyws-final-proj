@@ -34,10 +34,12 @@ export async function updateSession(request: NextRequest) {
 
   const user = data?.claims
 
-  if (
-    !user &&
-    !request.nextUrl.pathname.startsWith('/api/auth')
-  ) {
+  const isPublicRoute =
+    request.nextUrl.pathname === '/login' ||
+    request.nextUrl.pathname === '/sign-up' ||
+    request.nextUrl.pathname.startsWith('/api/auth')
+
+  if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)

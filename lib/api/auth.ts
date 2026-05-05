@@ -25,12 +25,10 @@ export async function isUserAuthenticated(): Promise<boolean> {
   }
 }
 
-export async function withAuthenticatedDb<T>(
-  request: NextRequest,
+async function runWithAuthenticatedDb<T>(
+  userId: string,
   fn: (db: AppDb, userId: string) => Promise<T>
 ): Promise<T> {
-  const userId = await getRequestUserId();
-
   const { db } = await import("@/utils/db-client");
 
   return db.transaction(async (tx) => {
@@ -42,4 +40,20 @@ export async function withAuthenticatedDb<T>(
 
     return fn(tx as unknown as AppDb, userId);
   });
+}
+
+export async function withAuthenticatedDb<T>(
+  request: NextRequest,
+  fn: (db: AppDb, userId: string) => Promise<T>
+): Promise<T> {
+  void request;
+  const userId = await getRequestUserId();
+  return runWithAuthenticatedDb(userId, fn);
+}
+
+export async function withCurrentUserDb<T>(
+  fn: (db: AppDb, userId: string) => Promise<T>
+): Promise<T> {
+  const userId = await getRequestUserId();
+  return runWithAuthenticatedDb(userId, fn);
 }

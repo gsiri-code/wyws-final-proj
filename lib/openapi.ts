@@ -228,7 +228,6 @@ export const openApiSpec = {
                           {
                             id: exampleWeekId,
                             diaryId: exampleDiaryId,
-                            weekNumber: 'week_1',
                             startDate: '2026-05-01',
                             endDate: '2026-05-07',
                             createdAt: '2026-05-05T04:48:00.000Z',
@@ -786,7 +785,6 @@ export const openApiSpec = {
         properties: {
           id: { type: 'string', format: 'uuid' },
           diaryId: { type: 'string', format: 'uuid' },
-          weekNumber: { type: 'string', enum: ['week_1', 'week_2'] },
           startDate: { type: 'string' },
           endDate: { type: 'string' },
           createdAt: { type: 'string', format: 'date-time' },
