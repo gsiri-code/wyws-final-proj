@@ -25,7 +25,7 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 All API routes expect an `x-user-id` header. The backend opens a DB transaction, sets `request.jwt.claim.sub`, and relies on your existing RLS policies.
 
 - `GET /api/diaries` — list a user's sleep diaries
-- `POST /api/diaries` — create a 14-day AASM-style diary from `{ "startDate": "YYYY-MM-DD" }`
+- `POST /api/diaries` — create a 7-day AASM-style diary from `{ "startDate": "YYYY-MM-DD" }`
 - `GET /api/diaries/[diaryId]` — fetch a diary with weeks, days, timeline items, and stored metrics
 - `PATCH /api/diaries/[diaryId]/days/[dayId]` — update `dayKind` and/or `notes`
 - `GET /api/diaries/[diaryId]/timeline-items` — list sleep/substance/bedtime timeline entries
@@ -36,7 +36,7 @@ All API routes expect an `x-user-id` header. The backend opens a DB transaction,
 - `POST /api/diaries/[diaryId]/metrics` — same as GET, useful for explicit refresh flows
 
 Supported timeline item types:
-`sleep`, `nap`, `awake`, `in_bed`, `exercise`, `caffeine`, `alcohol`, `medicine`, `bedtime_marker`, `wake_marker`, `note`
+`sleep`, `in_bed`, `exercise`, `caffeine`, `alcohol`, `medicine`, `note`
 
 ## Learn More
 

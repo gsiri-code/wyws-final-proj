@@ -60,9 +60,9 @@ export const diaries = pgTable(
   },
   (table) => ({
     userIdIdx: index("diaries_user_id_idx").on(table.userId),
-    twoWeekRangeCheck: check(
-      "diaries_two_week_range_check",
-      sql`${table.endDate} = ${table.startDate} + 13`
+    oneWeekRangeCheck: check(
+      "diaries_one_week_range_check",
+      sql`${table.endDate} = ${table.startDate} + 6`
     ),
     selectOwnDiary: pgPolicy("diaries_select_own", {
       for: "select",

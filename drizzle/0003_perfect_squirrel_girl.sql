@@ -1,0 +1,2 @@
+ALTER TABLE "diaries" DROP CONSTRAINT "diaries_two_week_range_check";--> statement-breakpoint
+ALTER TABLE "diaries" ADD CONSTRAINT "diaries_one_week_range_check" CHECK ("diaries"."end_date" = "diaries"."start_date" + 6);

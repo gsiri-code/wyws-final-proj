@@ -1,0 +1,1071 @@
+{
+  "id": "451395b6-c755-4687-ad54-4d8520c74330",
+  "prevId": "b7c6d5ee-2384-4599-b125-25e3ad5cfbab",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "auth.users": {
+      "name": "users",
+      "schema": "auth",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.diaries": {
+      "name": "diaries",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "start_date": {
+          "name": "start_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "end_date": {
+          "name": "end_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "diaries_user_id_idx": {
+          "name": "diaries_user_id_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "diaries_user_id_users_id_fk": {
+          "name": "diaries_user_id_users_id_fk",
+          "tableFrom": "diaries",
+          "tableTo": "users",
+          "schemaTo": "auth",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "diaries_select_own": {
+          "name": "diaries_select_own",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\"diaries\".\"user_id\" = (select auth.uid())"
+        },
+        "diaries_insert_own": {
+          "name": "diaries_insert_own",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "withCheck": "\"diaries\".\"user_id\" = (select auth.uid())"
+        },
+        "diaries_update_own": {
+          "name": "diaries_update_own",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\"diaries\".\"user_id\" = (select auth.uid())",
+          "withCheck": "\"diaries\".\"user_id\" = (select auth.uid())"
+        },
+        "diaries_delete_own": {
+          "name": "diaries_delete_own",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\"diaries\".\"user_id\" = (select auth.uid())"
+        }
+      },
+      "checkConstraints": {
+        "diaries_one_week_range_check": {
+          "name": "diaries_one_week_range_check",
+          "value": "\"diaries\".\"end_date\" = \"diaries\".\"start_date\" + 6"
+        }
+      },
+      "isRLSEnabled": true
+    },
+    "public.diary_days": {
+      "name": "diary_days",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "diary_id": {
+          "name": "diary_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "diary_week_id": {
+          "name": "diary_week_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "day_of_week": {
+          "name": "day_of_week",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "day_kind": {
+          "name": "day_kind",
+          "type": "day_kind",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'day_off'"
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "diary_days_diary_id_idx": {
+          "name": "diary_days_diary_id_idx",
+          "columns": [
+            {
+              "expression": "diary_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "diary_days_diary_week_id_idx": {
+          "name": "diary_days_diary_week_id_idx",
+          "columns": [
+            {
+              "expression": "diary_week_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "diary_days_user_id_idx": {
+          "name": "diary_days_user_id_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "diary_days_diary_id_diaries_id_fk": {
+          "name": "diary_days_diary_id_diaries_id_fk",
+          "tableFrom": "diary_days",
+          "tableTo": "diaries",
+          "columnsFrom": [
+            "diary_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "diary_days_diary_week_id_diary_weeks_id_fk": {
+          "name": "diary_days_diary_week_id_diary_weeks_id_fk",
+          "tableFrom": "diary_days",
+          "tableTo": "diary_weeks",
+          "columnsFrom": [
+            "diary_week_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "diary_days_user_id_users_id_fk": {
+          "name": "diary_days_user_id_users_id_fk",
+          "tableFrom": "diary_days",
+          "tableTo": "users",
+          "schemaTo": "auth",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "diary_days_diary_id_date_unique": {
+          "name": "diary_days_diary_id_date_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "diary_id",
+            "date"
+          ]
+        }
+      },
+      "policies": {
+        "diary_days_select_own": {
+          "name": "diary_days_select_own",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\"diary_days\".\"user_id\" = (select auth.uid())"
+        },
+        "diary_days_insert_own": {
+          "name": "diary_days_insert_own",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "withCheck": "\"diary_days\".\"user_id\" = (select auth.uid())"
+        },
+        "diary_days_update_own": {
+          "name": "diary_days_update_own",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\"diary_days\".\"user_id\" = (select auth.uid())",
+          "withCheck": "\"diary_days\".\"user_id\" = (select auth.uid())"
+        },
+        "diary_days_delete_own": {
+          "name": "diary_days_delete_own",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\"diary_days\".\"user_id\" = (select auth.uid())"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.diary_week_metrics": {
+      "name": "diary_week_metrics",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "diary_id": {
+          "name": "diary_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "diary_week_id": {
+          "name": "diary_week_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "average_bedtime": {
+          "name": "average_bedtime",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "average_wake_time": {
+          "name": "average_wake_time",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "average_total_sleep_time_minutes": {
+          "name": "average_total_sleep_time_minutes",
+          "type": "numeric(6, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "average_sleep_latency_minutes": {
+          "name": "average_sleep_latency_minutes",
+          "type": "numeric(6, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "average_waso_minutes": {
+          "name": "average_waso_minutes",
+          "type": "numeric(6, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "average_sleep_efficiency_percent": {
+          "name": "average_sleep_efficiency_percent",
+          "type": "numeric(5, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "calculated_at": {
+          "name": "calculated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "diary_week_metrics_diary_id_idx": {
+          "name": "diary_week_metrics_diary_id_idx",
+          "columns": [
+            {
+              "expression": "diary_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "diary_week_metrics_diary_week_id_idx": {
+          "name": "diary_week_metrics_diary_week_id_idx",
+          "columns": [
+            {
+              "expression": "diary_week_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "diary_week_metrics_diary_id_diaries_id_fk": {
+          "name": "diary_week_metrics_diary_id_diaries_id_fk",
+          "tableFrom": "diary_week_metrics",
+          "tableTo": "diaries",
+          "columnsFrom": [
+            "diary_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "diary_week_metrics_diary_week_id_diary_weeks_id_fk": {
+          "name": "diary_week_metrics_diary_week_id_diary_weeks_id_fk",
+          "tableFrom": "diary_week_metrics",
+          "tableTo": "diary_weeks",
+          "columnsFrom": [
+            "diary_week_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "diary_week_metrics_user_id_users_id_fk": {
+          "name": "diary_week_metrics_user_id_users_id_fk",
+          "tableFrom": "diary_week_metrics",
+          "tableTo": "users",
+          "schemaTo": "auth",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "diary_week_metrics_diary_week_id_unique": {
+          "name": "diary_week_metrics_diary_week_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "diary_week_id"
+          ]
+        }
+      },
+      "policies": {
+        "diary_week_metrics_select_own": {
+          "name": "diary_week_metrics_select_own",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\"diary_week_metrics\".\"user_id\" = (select auth.uid())"
+        },
+        "diary_week_metrics_insert_own": {
+          "name": "diary_week_metrics_insert_own",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "withCheck": "\"diary_week_metrics\".\"user_id\" = (select auth.uid())"
+        },
+        "diary_week_metrics_update_own": {
+          "name": "diary_week_metrics_update_own",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\"diary_week_metrics\".\"user_id\" = (select auth.uid())",
+          "withCheck": "\"diary_week_metrics\".\"user_id\" = (select auth.uid())"
+        },
+        "diary_week_metrics_delete_own": {
+          "name": "diary_week_metrics_delete_own",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\"diary_week_metrics\".\"user_id\" = (select auth.uid())"
+        }
+      },
+      "checkConstraints": {
+        "diary_week_metrics_sleep_efficiency_range_check": {
+          "name": "diary_week_metrics_sleep_efficiency_range_check",
+          "value": "\"diary_week_metrics\".\"average_sleep_efficiency_percent\" is null or (\"diary_week_metrics\".\"average_sleep_efficiency_percent\" >= 0 and \"diary_week_metrics\".\"average_sleep_efficiency_percent\" <= 100)"
+        }
+      },
+      "isRLSEnabled": true
+    },
+    "public.diary_weeks": {
+      "name": "diary_weeks",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "diary_id": {
+          "name": "diary_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "week_number": {
+          "name": "week_number",
+          "type": "diary_week_number",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "start_date": {
+          "name": "start_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "end_date": {
+          "name": "end_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "diary_weeks_diary_id_idx": {
+          "name": "diary_weeks_diary_id_idx",
+          "columns": [
+            {
+              "expression": "diary_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "diary_weeks_diary_id_diaries_id_fk": {
+          "name": "diary_weeks_diary_id_diaries_id_fk",
+          "tableFrom": "diary_weeks",
+          "tableTo": "diaries",
+          "columnsFrom": [
+            "diary_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "diary_weeks_diary_id_week_number_unique": {
+          "name": "diary_weeks_diary_id_week_number_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "diary_id",
+            "week_number"
+          ]
+        }
+      },
+      "policies": {
+        "diary_weeks_select_own": {
+          "name": "diary_weeks_select_own",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "exists (\n        select 1 from diaries\n        where diaries.id = \"diary_weeks\".\"diary_id\"\n          and diaries.user_id = (select auth.uid())\n      )"
+        },
+        "diary_weeks_insert_own": {
+          "name": "diary_weeks_insert_own",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "withCheck": "exists (\n        select 1 from diaries\n        where diaries.id = \"diary_weeks\".\"diary_id\"\n          and diaries.user_id = (select auth.uid())\n      )"
+        },
+        "diary_weeks_update_own": {
+          "name": "diary_weeks_update_own",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "exists (\n        select 1 from diaries\n        where diaries.id = \"diary_weeks\".\"diary_id\"\n          and diaries.user_id = (select auth.uid())\n      )",
+          "withCheck": "exists (\n        select 1 from diaries\n        where diaries.id = \"diary_weeks\".\"diary_id\"\n          and diaries.user_id = (select auth.uid())\n      )"
+        },
+        "diary_weeks_delete_own": {
+          "name": "diary_weeks_delete_own",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "exists (\n        select 1 from diaries\n        where diaries.id = \"diary_weeks\".\"diary_id\"\n          and diaries.user_id = (select auth.uid())\n      )"
+        }
+      },
+      "checkConstraints": {
+        "diary_weeks_seven_day_range_check": {
+          "name": "diary_weeks_seven_day_range_check",
+          "value": "\"diary_weeks\".\"end_date\" = \"diary_weeks\".\"start_date\" + 6"
+        }
+      },
+      "isRLSEnabled": true
+    },
+    "public.timeline_items": {
+      "name": "timeline_items",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "diary_id": {
+          "name": "diary_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "diary_week_id": {
+          "name": "diary_week_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "diary_day_id": {
+          "name": "diary_day_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "timeline_item_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "timestamp": {
+          "name": "timestamp",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "start_time": {
+          "name": "start_time",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "end_time": {
+          "name": "end_time",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "label": {
+          "name": "label",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "timeline_items_diary_id_idx": {
+          "name": "timeline_items_diary_id_idx",
+          "columns": [
+            {
+              "expression": "diary_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "timeline_items_diary_week_id_idx": {
+          "name": "timeline_items_diary_week_id_idx",
+          "columns": [
+            {
+              "expression": "diary_week_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "timeline_items_diary_day_id_idx": {
+          "name": "timeline_items_diary_day_id_idx",
+          "columns": [
+            {
+              "expression": "diary_day_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "timeline_items_user_id_idx": {
+          "name": "timeline_items_user_id_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "timeline_items_type_idx": {
+          "name": "timeline_items_type_idx",
+          "columns": [
+            {
+              "expression": "type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "timeline_items_timestamp_idx": {
+          "name": "timeline_items_timestamp_idx",
+          "columns": [
+            {
+              "expression": "timestamp",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "timeline_items_start_end_time_idx": {
+          "name": "timeline_items_start_end_time_idx",
+          "columns": [
+            {
+              "expression": "start_time",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "end_time",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "timeline_items_diary_id_diaries_id_fk": {
+          "name": "timeline_items_diary_id_diaries_id_fk",
+          "tableFrom": "timeline_items",
+          "tableTo": "diaries",
+          "columnsFrom": [
+            "diary_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "timeline_items_diary_week_id_diary_weeks_id_fk": {
+          "name": "timeline_items_diary_week_id_diary_weeks_id_fk",
+          "tableFrom": "timeline_items",
+          "tableTo": "diary_weeks",
+          "columnsFrom": [
+            "diary_week_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "timeline_items_diary_day_id_diary_days_id_fk": {
+          "name": "timeline_items_diary_day_id_diary_days_id_fk",
+          "tableFrom": "timeline_items",
+          "tableTo": "diary_days",
+          "columnsFrom": [
+            "diary_day_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "timeline_items_user_id_users_id_fk": {
+          "name": "timeline_items_user_id_users_id_fk",
+          "tableFrom": "timeline_items",
+          "tableTo": "users",
+          "schemaTo": "auth",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "timeline_items_select_own": {
+          "name": "timeline_items_select_own",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\"timeline_items\".\"user_id\" = (select auth.uid())"
+        },
+        "timeline_items_insert_own": {
+          "name": "timeline_items_insert_own",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "withCheck": "\"timeline_items\".\"user_id\" = (select auth.uid())"
+        },
+        "timeline_items_update_own": {
+          "name": "timeline_items_update_own",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\"timeline_items\".\"user_id\" = (select auth.uid())",
+          "withCheck": "\"timeline_items\".\"user_id\" = (select auth.uid())"
+        },
+        "timeline_items_delete_own": {
+          "name": "timeline_items_delete_own",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\"timeline_items\".\"user_id\" = (select auth.uid())"
+        }
+      },
+      "checkConstraints": {
+        "timeline_items_valid_point_or_interval_check": {
+          "name": "timeline_items_valid_point_or_interval_check",
+          "value": "(\n        (\"timeline_items\".\"timestamp\" is not null and \"timeline_items\".\"start_time\" is null and \"timeline_items\".\"end_time\" is null)\n        or\n        (\"timeline_items\".\"timestamp\" is null and \"timeline_items\".\"start_time\" is not null and \"timeline_items\".\"end_time\" is not null and \"timeline_items\".\"end_time\" > \"timeline_items\".\"start_time\")\n      )"
+        }
+      },
+      "isRLSEnabled": true
+    }
+  },
+  "enums": {
+    "public.day_kind": {
+      "name": "day_kind",
+      "schema": "public",
+      "values": [
+        "work",
+        "school",
+        "day_off"
+      ]
+    },
+    "public.diary_week_number": {
+      "name": "diary_week_number",
+      "schema": "public",
+      "values": [
+        "week_1",
+        "week_2"
+      ]
+    },
+    "public.timeline_item_type": {
+      "name": "timeline_item_type",
+      "schema": "public",
+      "values": [
+        "sleep",
+        "in_bed",
+        "exercise",
+        "caffeine",
+        "alcohol",
+        "medicine",
+        "note"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

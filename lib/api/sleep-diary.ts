@@ -3,7 +3,7 @@ import { diaries, diaryDays, diaryWeekMetrics, diaryWeeks, timelineItems } from 
 import type { AppDb } from "@/lib/api/db";
 import { ApiError } from "@/lib/api/http";
 
-const WEEK_NUMBERS = ["week_1", "week_2"] as const;
+const WEEK_NUMBERS = ["week_1"] as const;
 const BEDTIME_TYPES = new Set(["in_bed"]);
 const SLEEP_TYPES = new Set(["sleep"]);
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -64,7 +64,7 @@ export async function listDiaries(db: DbClient) {
 
 export async function createDiary(db: DbClient, userId: string, input: CreateDiaryInput) {
   const startDate = parseDateOnly(input.startDate);
-  const endDate = addDays(startDate, 13);
+  const endDate = addDays(startDate, 6);
 
   const [diary] = await db
     .insert(diaries)
@@ -94,9 +94,9 @@ export async function createDiary(db: DbClient, userId: string, input: CreateDia
   const weekByIndex = new Map(weeks.map((week, index) => [index, week]));
 
   await db.insert(diaryDays).values(
-    Array.from({ length: 14 }, (_, index) => {
+    Array.from({ length: 7 }, (_, index) => {
       const currentDate = addDays(startDate, index);
-      const week = weekByIndex.get(index < 7 ? 0 : 1);
+      const week = weekByIndex.get(0);
 
       if (!week) {
         throw new ApiError("Failed to initialize diary weeks", 500);

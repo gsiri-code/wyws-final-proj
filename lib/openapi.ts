@@ -192,7 +192,7 @@ export const openApiSpec = {
       },
       post: {
         tags: ['Diaries'],
-        summary: 'Create a 14-day diary',
+        summary: 'Create a 7-day diary',
         requestBody: {
           required: true,
           content: {
@@ -221,7 +221,7 @@ export const openApiSpec = {
                         id: exampleDiaryId,
                         userId: exampleUser.id,
                         startDate: '2026-05-01',
-                        endDate: '2026-05-14',
+                        endDate: '2026-05-07',
                         createdAt: '2026-05-05T04:48:00.000Z',
                         updatedAt: '2026-05-05T04:48:00.000Z',
                         weeks: [
@@ -231,15 +231,6 @@ export const openApiSpec = {
                             weekNumber: 'week_1',
                             startDate: '2026-05-01',
                             endDate: '2026-05-07',
-                            createdAt: '2026-05-05T04:48:00.000Z',
-                            updatedAt: '2026-05-05T04:48:00.000Z',
-                          },
-                          {
-                            id: exampleWeek2Id,
-                            diaryId: exampleDiaryId,
-                            weekNumber: 'week_2',
-                            startDate: '2026-05-08',
-                            endDate: '2026-05-14',
                             createdAt: '2026-05-05T04:48:00.000Z',
                             updatedAt: '2026-05-05T04:48:00.000Z',
                           },

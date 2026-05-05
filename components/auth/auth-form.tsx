@@ -11,7 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { signIn, signUp } from "@/lib/api/auth";
+import { signIn, signUp } from "@/lib/api/auth-client";
 import { ApiClientError } from "@/lib/api/client";
 import {
   loginSchema,
@@ -111,7 +111,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         <p className="text-sm text-foreground-muted leading-relaxed">
           {isLogin
             ? "Sign in to log a new night and review your weekly metrics."
-            : "Start a 14-day diary in 30 seconds. Free for as long as you need it."}
+            : "Start a 7-day diary in 30 seconds. Free for as long as you need it."}
         </p>
       </div>
 
@@ -119,13 +119,13 @@ export function AuthForm({ mode }: AuthFormProps) {
         <Alert tone="success">
           <AlertTitle>Account created</AlertTitle>
           <AlertDescription>
-            Sign in below to start your first 14-day diary.
+            Sign in below to start your first 7-day diary.
           </AlertDescription>
         </Alert>
       ) : null}
 
       {serverError ? (
-        <Alert tone="danger">
+        <Alert tone="error">
           <AlertTitle>{isLogin ? "Sign-in failed" : "Sign-up failed"}</AlertTitle>
           <AlertDescription>{serverError}</AlertDescription>
         </Alert>
