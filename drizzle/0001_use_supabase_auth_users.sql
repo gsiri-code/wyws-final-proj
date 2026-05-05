@@ -1,3 +1,25 @@
+-- Drop policies first: Postgres blocks ALTER COLUMN TYPE when policies depend on the column.
+DROP POLICY IF EXISTS "diaries_select_own" ON "diaries";
+DROP POLICY IF EXISTS "diaries_insert_own" ON "diaries";
+DROP POLICY IF EXISTS "diaries_update_own" ON "diaries";
+DROP POLICY IF EXISTS "diaries_delete_own" ON "diaries";
+DROP POLICY IF EXISTS "diary_days_select_own" ON "diary_days";
+DROP POLICY IF EXISTS "diary_days_insert_own" ON "diary_days";
+DROP POLICY IF EXISTS "diary_days_update_own" ON "diary_days";
+DROP POLICY IF EXISTS "diary_days_delete_own" ON "diary_days";
+DROP POLICY IF EXISTS "diary_week_metrics_select_own" ON "diary_week_metrics";
+DROP POLICY IF EXISTS "diary_week_metrics_insert_own" ON "diary_week_metrics";
+DROP POLICY IF EXISTS "diary_week_metrics_update_own" ON "diary_week_metrics";
+DROP POLICY IF EXISTS "diary_week_metrics_delete_own" ON "diary_week_metrics";
+DROP POLICY IF EXISTS "diary_weeks_select_own" ON "diary_weeks";
+DROP POLICY IF EXISTS "diary_weeks_insert_own" ON "diary_weeks";
+DROP POLICY IF EXISTS "diary_weeks_update_own" ON "diary_weeks";
+DROP POLICY IF EXISTS "diary_weeks_delete_own" ON "diary_weeks";
+DROP POLICY IF EXISTS "timeline_items_select_own" ON "timeline_items";
+DROP POLICY IF EXISTS "timeline_items_insert_own" ON "timeline_items";
+DROP POLICY IF EXISTS "timeline_items_update_own" ON "timeline_items";
+DROP POLICY IF EXISTS "timeline_items_delete_own" ON "timeline_items";
+
 ALTER TABLE "diaries" DROP CONSTRAINT "diaries_user_id_users_id_fk";
 ALTER TABLE "diary_days" DROP CONSTRAINT "diary_days_user_id_users_id_fk";
 ALTER TABLE "diary_week_metrics" DROP CONSTRAINT "diary_week_metrics_user_id_users_id_fk";
@@ -24,27 +46,6 @@ ALTER TABLE "diary_week_metrics"
 ALTER TABLE "timeline_items"
   ADD CONSTRAINT "timeline_items_user_id_auth_users_id_fk"
   FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON DELETE cascade ON UPDATE no action;
-
-DROP POLICY IF EXISTS "diaries_select_own" ON "diaries";
-DROP POLICY IF EXISTS "diaries_insert_own" ON "diaries";
-DROP POLICY IF EXISTS "diaries_update_own" ON "diaries";
-DROP POLICY IF EXISTS "diaries_delete_own" ON "diaries";
-DROP POLICY IF EXISTS "diary_days_select_own" ON "diary_days";
-DROP POLICY IF EXISTS "diary_days_insert_own" ON "diary_days";
-DROP POLICY IF EXISTS "diary_days_update_own" ON "diary_days";
-DROP POLICY IF EXISTS "diary_days_delete_own" ON "diary_days";
-DROP POLICY IF EXISTS "diary_week_metrics_select_own" ON "diary_week_metrics";
-DROP POLICY IF EXISTS "diary_week_metrics_insert_own" ON "diary_week_metrics";
-DROP POLICY IF EXISTS "diary_week_metrics_update_own" ON "diary_week_metrics";
-DROP POLICY IF EXISTS "diary_week_metrics_delete_own" ON "diary_week_metrics";
-DROP POLICY IF EXISTS "diary_weeks_select_own" ON "diary_weeks";
-DROP POLICY IF EXISTS "diary_weeks_insert_own" ON "diary_weeks";
-DROP POLICY IF EXISTS "diary_weeks_update_own" ON "diary_weeks";
-DROP POLICY IF EXISTS "diary_weeks_delete_own" ON "diary_weeks";
-DROP POLICY IF EXISTS "timeline_items_select_own" ON "timeline_items";
-DROP POLICY IF EXISTS "timeline_items_insert_own" ON "timeline_items";
-DROP POLICY IF EXISTS "timeline_items_update_own" ON "timeline_items";
-DROP POLICY IF EXISTS "timeline_items_delete_own" ON "timeline_items";
 
 CREATE POLICY "diaries_select_own" ON "diaries" AS PERMISSIVE FOR SELECT TO "authenticated" USING ("diaries"."user_id" = (select auth.uid()));
 CREATE POLICY "diaries_insert_own" ON "diaries" AS PERMISSIVE FOR INSERT TO "authenticated" WITH CHECK ("diaries"."user_id" = (select auth.uid()));

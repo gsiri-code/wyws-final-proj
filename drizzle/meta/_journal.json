@@ -15,6 +15,13 @@
       "when": 1777940447079,
       "tag": "0001_use_supabase_auth_users",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1778009473561,
+      "tag": "0002_hesitant_switch",
+      "breakpoints": true
     }
   ]
 }
