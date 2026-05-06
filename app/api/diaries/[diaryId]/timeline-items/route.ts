@@ -12,7 +12,9 @@ export async function GET(
 ) {
   try {
     const { diaryId } = await context.params;
-    const result = await withAuthenticatedDb(request, async (db) => listTimelineItems(db, diaryId));
+    const result = await withAuthenticatedDb(request, async (db, userId) =>
+      listTimelineItems(db, diaryId, userId)
+    );
     return NextResponse.json({ timelineItems: result });
   } catch (error) {
     return jsonError(error);

@@ -13,8 +13,8 @@ export async function PATCH(
   try {
     const { diaryId, dayId } = await context.params;
     const input = await parseJson(request, updateDiaryDaySchema);
-    const result = await withAuthenticatedDb(request, async (db) =>
-      updateDiaryDay(db, diaryId, dayId, input)
+    const result = await withAuthenticatedDb(request, async (db, userId) =>
+      updateDiaryDay(db, diaryId, dayId, userId, input)
     );
 
     return NextResponse.json({ day: result });

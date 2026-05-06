@@ -13,8 +13,8 @@ export async function PATCH(
   try {
     const { diaryId, itemId } = await context.params;
     const input = await parseJson(request, updateTimelineItemSchema);
-    const result = await withAuthenticatedDb(request, async (db) =>
-      updateTimelineItem(db, diaryId, itemId, input)
+    const result = await withAuthenticatedDb(request, async (db, userId) =>
+      updateTimelineItem(db, diaryId, itemId, userId, input)
     );
 
     return NextResponse.json({ timelineItem: result });
@@ -29,8 +29,8 @@ export async function DELETE(
 ) {
   try {
     const { diaryId, itemId } = await context.params;
-    const result = await withAuthenticatedDb(request, async (db) =>
-      deleteTimelineItem(db, diaryId, itemId)
+    const result = await withAuthenticatedDb(request, async (db, userId) =>
+      deleteTimelineItem(db, diaryId, itemId, userId)
     );
 
     return NextResponse.json({ deleted: result });

@@ -214,6 +214,12 @@ function getTimeZoneParts(date: Date) {
   };
 }
 
+/** Minutes since local midnight in {@link APP_TIME_ZONE} (matches diary grid wall time). */
+export function getWallClockMinutesInAppTimeZone(date: Date): number {
+  const { hour, minute } = getTimeZoneParts(date);
+  return hour * 60 + minute;
+}
+
 function formatDateKey(year: number, month: number, day: number) {
   return `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 }

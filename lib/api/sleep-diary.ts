@@ -1,4 +1,5 @@
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, gte, lte } from "drizzle-orm";
+import { getWallClockMinutesInAppTimeZone } from "@/lib/diary/aasm-grid";
 import { diaries, diaryDays, diaryWeekMetrics, diaryWeeks, timelineItems } from "@/schema";
 import type { AppDb } from "@/lib/api/db";
 import { ApiError } from "@/lib/api/http";
@@ -14,7 +15,7 @@ type CreateDiaryInput = {
 };
 
 type UpdateDiaryDayInput = {
-  dayKind?: "work" | "school" | "day_off";
+  dayKind?: "work" | "school" | "day_off" | null;
   notes?: string | null;
 };
 
@@ -46,7 +47,19 @@ type UpdateTimelineItemInput = {
 type DiaryDayRow = typeof diaryDays.$inferSelect;
 type TimelineItemRow = typeof timelineItems.$inferSelect;
 
-export async function listDiaries(db: DbClient) {
+export async function ensureDiaryOwned(db: DbClient, diaryId: string, userId: string) {
+  const [row] = await db
+    .select({ id: diaries.id })
+    .from(diaries)
+    .where(and(eq(diaries.id, diaryId), eq(diaries.userId, userId)))
+    .limit(1);
+
+  if (!row) {
+    throw new ApiError("Diary not found", 404);
+  }
+}
+
+export async function listDiaries(db: DbClient, userId: string) {
   const rows = await db
     .select({
       id: diaries.id,
@@ -56,6 +69,7 @@ export async function listDiaries(db: DbClient) {
       updatedAt: diaries.updatedAt,
     })
     .from(diaries)
+    .where(eq(diaries.userId, userId))
     .orderBy(desc(diaries.startDate));
 
   return rows;
@@ -64,6 +78,9 @@ export async function listDiaries(db: DbClient) {
 export async function createDiary(db: DbClient, userId: string, input: CreateDiaryInput) {
   const startDate = parseDateOnly(input.startDate);
   const endDate = addDays(startDate, 6);
+
+  ensureDiaryStartDateAllowed(startDate);
+  await ensureDiaryRangeAvailable(db, userId, startDate, endDate);
 
   const [diary] = await db
     .insert(diaries)
@@ -112,11 +129,15 @@ export async function createDiary(db: DbClient, userId: string, input: CreateDia
     })
   );
 
-  return getDiaryById(db, diary.id);
+  return getDiaryById(db, diary.id, userId);
 }
 
-export async function getDiaryById(db: DbClient, diaryId: string) {
-  const [diary] = await db.select().from(diaries).where(eq(diaries.id, diaryId)).limit(1);
+export async function getDiaryById(db: DbClient, diaryId: string, userId: string) {
+  const [diary] = await db
+    .select()
+    .from(diaries)
+    .where(and(eq(diaries.id, diaryId), eq(diaries.userId, userId)))
+    .limit(1);
 
   if (!diary) {
     throw new ApiError("Diary not found", 404);
@@ -159,8 +180,11 @@ export async function updateDiaryDay(
   db: DbClient,
   diaryId: string,
   dayId: string,
+  userId: string,
   input: UpdateDiaryDayInput
 ) {
+  await ensureDiaryOwned(db, diaryId, userId);
+
   const [day] = await db
     .update(diaryDays)
     .set({
@@ -178,7 +202,9 @@ export async function updateDiaryDay(
   return day;
 }
 
-export async function listTimelineItems(db: DbClient, diaryId: string) {
+export async function listTimelineItems(db: DbClient, diaryId: string, userId: string) {
+  await ensureDiaryOwned(db, diaryId, userId);
+
   return db
     .select()
     .from(timelineItems)
@@ -192,6 +218,8 @@ export async function createTimelineItem(
   diaryId: string,
   input: CreateTimelineItemInput
 ) {
+  await ensureDiaryOwned(db, diaryId, userId);
+
   const [day] = await db
     .select({
       id: diaryDays.id,
@@ -232,8 +260,11 @@ export async function updateTimelineItem(
   db: DbClient,
   diaryId: string,
   itemId: string,
+  userId: string,
   input: UpdateTimelineItemInput
 ) {
+  await ensureDiaryOwned(db, diaryId, userId);
+
   const [item] = await db
     .update(timelineItems)
     .set({
@@ -256,7 +287,9 @@ export async function updateTimelineItem(
   return item;
 }
 
-export async function deleteTimelineItem(db: DbClient, diaryId: string, itemId: string) {
+export async function deleteTimelineItem(db: DbClient, diaryId: string, itemId: string, userId: string) {
+  await ensureDiaryOwned(db, diaryId, userId);
+
   const [item] = await db
     .delete(timelineItems)
     .where(and(eq(timelineItems.id, itemId), eq(timelineItems.diaryId, diaryId)))
@@ -269,7 +302,24 @@ export async function deleteTimelineItem(db: DbClient, diaryId: string, itemId: 
   return item;
 }
 
+export async function deleteDiary(db: DbClient, diaryId: string, userId: string) {
+  await ensureDiaryOwned(db, diaryId, userId);
+
+  const [deleted] = await db
+    .delete(diaries)
+    .where(and(eq(diaries.id, diaryId), eq(diaries.userId, userId)))
+    .returning({ id: diaries.id });
+
+  if (!deleted) {
+    throw new ApiError("Diary not found", 404);
+  }
+
+  return deleted;
+}
+
 export async function recalculateDiaryMetrics(db: DbClient, diaryId: string, userId: string) {
+  await ensureDiaryOwned(db, diaryId, userId);
+
   const weeks = await db
     .select()
     .from(diaryWeeks)
@@ -420,8 +470,8 @@ function computeDayMetrics(day: DiaryDayRow, items: TimelineItemRow[]) {
   const wake = latestSleepEnd(items) ?? null;
   const sleepStart = sleepEvent?.eventStart ?? null;
 
-  const bedtimeMinutes = bedtime ? toMinutesAfterMidnight(bedtime) : null;
-  const wakeMinutes = wake ? toMinutesAfterMidnight(wake) : null;
+  const bedtimeMinutes = bedtime ? getWallClockMinutesInAppTimeZone(bedtime) : null;
+  const wakeMinutes = wake ? getWallClockMinutesInAppTimeZone(wake) : null;
   const totalSleepMinutes = sumIntervals(sleepIntervals);
   const sleepLatencyMinutes = bedtime && sleepStart ? diffMinutes(bedtime, sleepStart) : null;
   const wasoMinutes = sumIntervals(wasoIntervals);
@@ -510,12 +560,43 @@ function averageClockTime(values: number[]) {
   return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:00`;
 }
 
-function toMinutesAfterMidnight(date: Date) {
-  return date.getUTCHours() * 60 + date.getUTCMinutes();
-}
-
 function diffMinutes(start: Date, end: Date) {
   return (end.getTime() - start.getTime()) / 60000;
+}
+
+async function ensureDiaryRangeAvailable(
+  db: DbClient,
+  userId: string,
+  startDate: Date,
+  endDate: Date
+) {
+  const start = formatDateOnly(startDate);
+  const end = formatDateOnly(endDate);
+
+  const [existing] = await db
+    .select({ id: diaries.id })
+    .from(diaries)
+    .where(
+      and(
+        eq(diaries.userId, userId),
+        lte(diaries.startDate, end),
+        gte(diaries.endDate, start)
+      )
+    )
+    .limit(1);
+
+  if (existing) {
+    throw new ApiError("Diary dates overlap an existing diary", 409);
+  }
+}
+
+function ensureDiaryStartDateAllowed(startDate: Date) {
+  const today = formatDateOnly(new Date());
+  const nextStartDate = formatDateOnly(startDate);
+
+  if (nextStartDate > today) {
+    throw new ApiError("startDate cannot be in the future", 422);
+  }
 }
 
 function parseDateOnly(value: string) {

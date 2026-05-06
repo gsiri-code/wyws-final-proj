@@ -8,7 +8,7 @@ export const runtime = "nodejs";
 
 export async function GET(request: NextRequest) {
   try {
-    const result = await withAuthenticatedDb(request, async (db) => listDiaries(db));
+    const result = await withAuthenticatedDb(request, async (db, userId) => listDiaries(db, userId));
     return NextResponse.json({ diaries: result });
   } catch (error) {
     return jsonError(error);
