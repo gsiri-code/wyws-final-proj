@@ -1,4 +1,15 @@
-import type { DiaryDay, TimelineItem } from "@/lib/api/diaries-client";
+export type DiaryGridDay = {
+  id: string;
+  date: string;
+};
+
+export type DiaryGridTimelineItem = {
+  id?: string;
+  diaryDayId: string;
+  timestamp: Date | string | null;
+  startTime: Date | string | null;
+  endTime: Date | string | null;
+};
 
 export const APP_TIME_ZONE = "America/New_York";
 const HOUR_MS = 60 * 60 * 1000;
@@ -67,7 +78,7 @@ export function getHourIndexFromDateTime(dateTime: Date | string, diaryDayDate: 
   return null;
 }
 
-export function getCellsForTimelineItem(item: TimelineItem, diaryDayDate: string) {
+export function getCellsForTimelineItem<T extends DiaryGridTimelineItem>(item: T, diaryDayDate: string) {
   if (item.timestamp) {
     const hourIndex = getHourIndexFromDateTime(item.timestamp, diaryDayDate);
     return hourIndex === null ? [] : [hourIndex];
@@ -86,9 +97,12 @@ export function getCellsForTimelineItem(item: TimelineItem, diaryDayDate: string
   return cells;
 }
 
-export function mapTimelineItemsToGrid(days: DiaryDay[], timelineItems: TimelineItem[]) {
+export function mapTimelineItemsToGrid<TDay extends DiaryGridDay, TItem extends DiaryGridTimelineItem>(
+  days: TDay[],
+  timelineItems: TItem[]
+) {
   const dayDateById = new Map(days.map((day) => [day.id, day.date]));
-  const grid = new Map<string, TimelineItem>();
+  const grid = new Map<string, TItem>();
 
   for (const item of timelineItems) {
     const dayDate = dayDateById.get(item.diaryDayId);
@@ -104,7 +118,7 @@ export function mapTimelineItemsToGrid(days: DiaryDay[], timelineItems: Timeline
 
 export function hasOverlap(
   selectedCells: number[],
-  existingTimelineItems: TimelineItem[],
+  existingTimelineItems: DiaryGridTimelineItem[],
   diaryDayDate: string,
   itemId?: string
 ) {

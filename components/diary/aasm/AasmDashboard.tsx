@@ -33,6 +33,7 @@ import {
   isNapHour,
   isSleepHour,
 } from "@/lib/diary/aasm-grid";
+import { isDiaryWeekCompletedForExport } from "@/lib/diary/diary-export-eligibility";
 
 interface AasmDashboardProps {
   initialDiary: DiaryDetail | null;
@@ -347,6 +348,7 @@ export function AasmDashboard({ initialDiary }: AasmDashboardProps) {
     if (!diary) return null;
     return diary.metrics.find((metric) => metric.diaryWeekId === diary.weeks[0]?.id) ?? null;
   }, [diary]);
+  const canExport = diary ? isDiaryWeekCompletedForExport(diary.endDate) : false;
 
   if (!diary) {
     return (
@@ -358,7 +360,20 @@ export function AasmDashboard({ initialDiary }: AasmDashboardProps) {
   }
 
   return (
-    <DashboardFrame title="Dashboard" description={formatDateRange(diary.startDate, diary.endDate)}>
+    <DashboardFrame
+      title="Dashboard"
+      description={formatDateRange(diary.startDate, diary.endDate)}
+      headerActions={
+        canExport ? (
+          <a
+            href={`/api/diaries/${diary.id}/export/weekly`}
+            className="inline-flex h-9 items-center justify-center rounded-md bg-slate-100 px-3 text-sm font-medium text-slate-900 transition hover:bg-slate-200"
+          >
+            Export PDF
+          </a>
+        ) : null
+      }
+    >
       {error ? <DashboardError error={error} /> : null}
       <SummaryRow progress={progress} currentMetric={currentMetric} />
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -402,10 +417,12 @@ export function AasmDashboard({ initialDiary }: AasmDashboardProps) {
 function DashboardFrame({
   title,
   description,
+  headerActions,
   children,
 }: {
   title: string;
   description: string;
+  headerActions?: React.ReactNode;
   children: React.ReactNode;
 }) {
   const router = useRouter();
@@ -437,6 +454,7 @@ function DashboardFrame({
           <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
         </div>
         <div className="flex flex-wrap items-center justify-end gap-2">
+          {headerActions}
           <div className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 shadow-sm">
             7-day AASM log • Week 1 only
           </div>

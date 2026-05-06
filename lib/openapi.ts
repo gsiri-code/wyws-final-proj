@@ -524,6 +524,7 @@ export const openApiSpec = {
             },
           },
           '401': { $ref: '#/components/responses/AuthError401' },
+          '403': { $ref: '#/components/responses/ApiError403' },
           '404': { $ref: '#/components/responses/ApiError404' },
         },
       },
@@ -626,6 +627,18 @@ export const openApiSpec = {
             examples: {
               invalidJson: { value: { message: 'Invalid JSON body' } },
               authError: { value: { message: 'Auth error: Invalid login credentials' } },
+            },
+          },
+        },
+      },
+      ApiError403: {
+        description: 'Action is not allowed for the current diary state',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/schemas/ErrorResponse' },
+            example: {
+              error: 'Weekly diary PDF is only available after the diary week is complete.',
+              details: null,
             },
           },
         },

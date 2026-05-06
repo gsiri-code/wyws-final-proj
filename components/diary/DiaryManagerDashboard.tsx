@@ -10,6 +10,7 @@ import {
   type DiaryDetail,
   type DiarySummary,
 } from "@/lib/api/diaries-client";
+import { isDiaryWeekCompletedForExport } from "@/lib/diary/diary-export-eligibility";
 
 interface DiaryManagerDashboardProps {
   initialDiaries: DiarySummary[];
@@ -123,6 +124,14 @@ export function DiaryManagerDashboard({ initialDiaries }: DiaryManagerDashboardP
                   >
                     Metrics
                   </Link>
+                  {isDiaryWeekCompletedForExport(diary.endDate) ? (
+                    <a
+                      href={`/api/diaries/${diary.id}/export/weekly`}
+                      className="inline-flex h-9 items-center justify-center rounded-md bg-slate-100 px-3 text-sm font-medium text-slate-900 transition hover:bg-slate-200"
+                    >
+                      Export PDF
+                    </a>
+                  ) : null}
                   <Button
                     type="button"
                     variant="ghost"

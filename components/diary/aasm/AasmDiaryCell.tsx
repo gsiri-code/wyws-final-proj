@@ -1,5 +1,6 @@
 import * as React from "react";
 import type { TimelineItem } from "@/lib/api/diaries-client";
+import { getTimelineItemPresentation } from "@/lib/diary/aasm-presentation";
 
 interface AasmDiaryCellProps {
   item?: TimelineItem;
@@ -8,16 +9,6 @@ interface AasmDiaryCellProps {
   onPointerDown: () => void;
   onPointerEnter: () => void;
 }
-
-const EVENT_PRESENTATIONS = {
-  nap: { code: "N", label: "Nap", className: "bg-violet-200 text-violet-900" },
-  sleep: { code: "S", label: "Sleep", className: "bg-indigo-200 text-indigo-950" },
-  in_bed: { code: "B", label: "In bed", className: "bg-blue-200 text-blue-950" },
-  exercise: { code: "E", label: "Exercise", className: "bg-emerald-200 text-emerald-950" },
-  caffeine: { code: "C", label: "Caffeine", className: "bg-yellow-200 text-yellow-950" },
-  alcohol: { code: "A", label: "Alcohol", className: "bg-rose-200 text-rose-950" },
-  medicine: { code: "M", label: "Medicine", className: "bg-sky-200 text-sky-950" },
-} as const;
 
 export const AasmDiaryCell = React.memo(function AasmDiaryCell({
   item,
@@ -58,29 +49,5 @@ export const AasmDiaryCell = React.memo(function AasmDiaryCell({
 });
 
 export function getEventPresentation(item: TimelineItem) {
-  if (item.type === "sleep" && item.metadata.segment === "nap") {
-    return EVENT_PRESENTATIONS.nap;
-  }
-
-  if (item.type === "sleep") {
-    return EVENT_PRESENTATIONS.sleep;
-  }
-
-  if (item.type === "in_bed") {
-    return EVENT_PRESENTATIONS.in_bed;
-  }
-
-  if (item.type === "exercise") {
-    return EVENT_PRESENTATIONS.exercise;
-  }
-
-  if (item.type === "caffeine") {
-    return EVENT_PRESENTATIONS.caffeine;
-  }
-
-  if (item.type === "alcohol") {
-    return EVENT_PRESENTATIONS.alcohol;
-  }
-
-  return EVENT_PRESENTATIONS.medicine;
+  return getTimelineItemPresentation(item);
 }

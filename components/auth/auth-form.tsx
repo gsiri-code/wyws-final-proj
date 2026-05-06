@@ -11,7 +11,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { signIn, signUp } from "@/lib/api/auth-client";
+import { signUp } from "@/lib/api/auth-client";
+import { createClient } from "@/lib/supabase/client";
 import { ApiClientError } from "@/lib/api/client";
 import {
   loginSchema,
@@ -55,10 +56,20 @@ export function AuthForm({ mode }: AuthFormProps) {
     setServerError(null);
     try {
       if (isLogin) {
-        await signIn({ email: values.email, password: values.password });
-        toast.success("Welcome back");
+        const supabase = createClient();
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: values.email,
+          password: values.password,
+        });
+        if (signInError) {
+          throw new ApiClientError(signInError.message || "Sign-in failed.", {
+            status: typeof signInError.status === "number" ? signInError.status : 400,
+          });
+        }
+        toast.success("Welcome back — taking you to your dashboard.");
         const next = searchParams?.get("next");
-        router.push(next && next.startsWith("/") ? next : "/dashboard");
+        const destination = next && next.startsWith("/") ? next : "/dashboard";
+        router.replace(destination);
         router.refresh();
       } else {
         const signupValues = values as SignupInput;
@@ -219,7 +230,7 @@ export function AuthForm({ mode }: AuthFormProps) {
                 placeholder="••••••••"
                 invalid={
                   !!(form.formState.errors as Record<string, unknown>)[
-                    "confirmPassword"
+                  "confirmPassword"
                   ]
                 }
                 {...form.register("confirmPassword" as keyof FormValues)}
