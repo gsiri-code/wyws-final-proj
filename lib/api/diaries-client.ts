@@ -34,7 +34,7 @@ export interface DiaryDay {
   userId: string;
   date: string;
   dayOfWeek: string;
-  dayKind: DayKind;
+  dayKind: DayKind | null;
   notes: string | null;
   createdAt: string;
   updatedAt: string;
@@ -104,6 +104,10 @@ interface DeletedResponse {
   deleted: { id: string };
 }
 
+interface DiaryDayResponse {
+  day: DiaryDay;
+}
+
 export function listDiaries() {
   return fetchJson<DiariesResponse>("/api/diaries");
 }
@@ -117,6 +121,23 @@ export function createDiary(startDate: string) {
 
 export function getDiary(diaryId: string) {
   return fetchJson<DiaryResponse>(`/api/diaries/${diaryId}`);
+}
+
+export function deleteDiary(diaryId: string) {
+  return fetchJson<DeletedResponse>(`/api/diaries/${diaryId}`, {
+    method: "DELETE",
+  });
+}
+
+export function patchDiaryDay(
+  diaryId: string,
+  dayId: string,
+  body: { dayKind?: DayKind | null; notes?: string | null }
+) {
+  return fetchJson<DiaryDayResponse>(`/api/diaries/${diaryId}/days/${dayId}`, {
+    method: "PATCH",
+    body: JSON.stringify(body),
+  });
 }
 
 export function listTimelineItems(diaryId: string) {
