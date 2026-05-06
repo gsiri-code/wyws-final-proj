@@ -1,7 +1,7 @@
 const legendItems = [
   ["S", "Sleep", "bg-indigo-200 text-indigo-950"],
   ["N", "Nap", "bg-violet-200 text-violet-950"],
-  ["B", "In bed", "bg-amber-200 text-amber-950"],
+  ["B", "In bed", "bg-blue-200 text-blue-950"],
   ["E", "Exercise", "bg-emerald-200 text-emerald-950"],
   ["C", "Caffeine", "bg-yellow-200 text-yellow-950"],
   ["A", "Alcohol", "bg-rose-200 text-rose-950"],

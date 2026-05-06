@@ -29,3 +29,14 @@ export async function signUp(input: { email: string; password: string }) {
   }
 }
 
+export async function signOut() {
+  try {
+    return await fetchJson<{ message: string }>("/api/auth/sign-out", {
+      method: "POST",
+    });
+  } catch (err) {
+    if (err instanceof ApiClientError) throw err;
+    throw new ApiClientError("Sign-out failed.");
+  }
+}
+

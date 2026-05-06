@@ -1,4 +1,5 @@
-import type { DiaryDay, TimelineItem } from "@/lib/api/diaries-client";
+import * as React from "react";
+import type { DayKind, DiaryDay, TimelineItem } from "@/lib/api/diaries-client";
 import { mapTimelineItemsToGrid } from "@/lib/diary/aasm-grid";
 import { AasmDiaryHeader } from "@/components/diary/aasm/AasmDiaryHeader";
 import { AasmDiaryRow } from "@/components/diary/aasm/AasmDiaryRow";
@@ -10,20 +11,23 @@ interface AasmDiaryGridProps {
   selectedCells: number[];
   onCellPointerDown: (day: DiaryDay, hourIndex: number, item?: TimelineItem) => void;
   onCellPointerEnter: (day: DiaryDay, hourIndex: number) => void;
+  onDayKindChange: (day: DiaryDay, nextKind: DayKind | null) => void;
 }
 
 const gridTemplateColumns = "7.5rem 8rem 8rem repeat(24, minmax(2.8rem, 1fr))";
+const EMPTY_SELECTION = new Set<number>();
 
-export function AasmDiaryGrid({
+export const AasmDiaryGrid = React.memo(function AasmDiaryGrid({
   days,
   timelineItems,
   selectionDayId,
   selectedCells,
   onCellPointerDown,
   onCellPointerEnter,
+  onDayKindChange,
 }: AasmDiaryGridProps) {
-  const gridItems = mapTimelineItemsToGrid(days, timelineItems);
-  const selectionSet = new Set(selectedCells);
+  const gridItems = React.useMemo(() => mapTimelineItemsToGrid(days, timelineItems), [days, timelineItems]);
+  const selectionSet = React.useMemo(() => new Set(selectedCells), [selectedCells]);
 
   return (
     <div className="flex gap-3">
@@ -36,24 +40,14 @@ export function AasmDiaryGrid({
               day={day}
               gridTemplateColumns={gridTemplateColumns}
               gridItems={gridItems}
-              selectedCells={selectionDayId === day.id ? selectionSet : new Set<number>()}
+              selectedCells={selectionDayId === day.id ? selectionSet : EMPTY_SELECTION}
               onCellPointerDown={onCellPointerDown}
               onCellPointerEnter={onCellPointerEnter}
+              onDayKindChange={onDayKindChange}
             />
           ))}
         </div>
       </div>
-      <div className="hidden shrink-0 items-center lg:flex">
-        <div className="flex h-full min-h-[420px] items-center gap-3 rounded-full border border-slate-200 bg-white px-4 py-6 shadow-sm">
-          <span className="h-full w-px bg-slate-300" />
-          <span
-            className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500"
-            style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
-          >
-            Week 1 only
-          </span>
-        </div>
-      </div>
     </div>
   );
-}
+});
