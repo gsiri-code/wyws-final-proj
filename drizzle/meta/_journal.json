@@ -36,6 +36,13 @@
       "when": 1778013490367,
       "tag": "0004_fantastic_aaron_stack",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1778023705943,
+      "tag": "0005_diary_day_kind_nullable",
+      "breakpoints": true
     }
   ]
 }

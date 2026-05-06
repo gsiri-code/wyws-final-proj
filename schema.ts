@@ -161,7 +161,7 @@ export const diaryDays = pgTable(
       .references(() => authUsers.id, { onDelete: "cascade" }),
     date: date("date", { mode: "string" }).notNull(),
     dayOfWeek: text("day_of_week").notNull(),
-    dayKind: dayKindEnum("day_kind").default("day_off").notNull(),
+    dayKind: dayKindEnum("day_kind"),
     notes: text("notes"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),

@@ -21,7 +21,7 @@ export const createDiarySchema = z.object({
 
 export const updateDiaryDaySchema = z
   .object({
-    dayKind: z.enum(["work", "school", "day_off"]).optional(),
+    dayKind: z.enum(["work", "school", "day_off"]).nullable().optional(),
     notes: z.string().trim().max(4000).nullable().optional(),
   })
   .refine((value) => value.dayKind !== undefined || value.notes !== undefined, {

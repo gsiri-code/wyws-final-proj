@@ -241,7 +241,7 @@ export const openApiSpec = {
                             userId: exampleUser.id,
                             date: '2026-05-01',
                             dayOfWeek: 'Friday',
-                            dayKind: 'day_off',
+                            dayKind: null,
                             notes: null,
                             createdAt: '2026-05-05T04:48:00.000Z',
                             updatedAt: '2026-05-05T04:48:00.000Z',
@@ -300,6 +300,9 @@ export const openApiSpec = {
                 },
                 updateNotes: {
                   value: { notes: 'Slept better than expected.' },
+                },
+                clearDayKind: {
+                  value: { dayKind: null },
                 },
               },
             },
@@ -489,6 +492,34 @@ export const openApiSpec = {
                 example: {
                   deleted: { id: exampleItemId },
                 },
+              },
+            },
+          },
+          '401': { $ref: '#/components/responses/AuthError401' },
+          '404': { $ref: '#/components/responses/ApiError404' },
+        },
+      },
+    },
+    '/api/diaries/{diaryId}/export/weekly': {
+      get: {
+        tags: ['Diaries'],
+        summary: 'Download weekly diary PDF export',
+        parameters: [{ $ref: '#/components/parameters/DiaryId' }],
+        responses: {
+          '200': {
+            description: 'Weekly diary PDF',
+            content: {
+              'application/pdf': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+            },
+            headers: {
+              'Content-Disposition': {
+                schema: { type: 'string' },
+                description: 'Attachment filename for the generated PDF export.',
               },
             },
           },
@@ -708,8 +739,8 @@ export const openApiSpec = {
         type: 'object',
         properties: {
           dayKind: {
-            type: 'string',
-            enum: ['work', 'school', 'day_off'],
+            type: ['string', 'null'],
+            enum: ['work', 'school', 'day_off', null],
           },
           notes: {
             type: ['string', 'null'],
@@ -799,7 +830,7 @@ export const openApiSpec = {
           userId: { type: 'string', format: 'uuid' },
           date: { type: 'string' },
           dayOfWeek: { type: 'string' },
-          dayKind: { type: 'string', enum: ['work', 'school', 'day_off'] },
+          dayKind: { type: ['string', 'null'], enum: ['work', 'school', 'day_off', null] },
           notes: { type: ['string', 'null'] },
           createdAt: { type: 'string', format: 'date-time' },
           updatedAt: { type: 'string', format: 'date-time' },
